@@ -7,6 +7,7 @@
 const int pin_servo = 3;
 const int pin_led = 53;  //for debug
 const int open_duration = 3000;
+const int detach_duration = 1500;
 const int close_degree = 159;
 const int open_degree = 132;
 
@@ -17,7 +18,15 @@ Servo grove_servo;
 rgb_lcd lcd;  //for debug
 
 void delay_close() {
+  grove_servo.attach(pin_servo);
   grove_servo.write(close_degree);
+  FlexiTimer2::stop();
+  FlexiTimer2::set(detach_duration, delay_detach);
+  FlexiTimer2::start();
+}
+
+void delay_detach() {
+  grove_servo.detach();
   FlexiTimer2::stop();
 }
 
@@ -27,6 +36,9 @@ void setup(){
   pinMode(pin_led, OUTPUT);  //for debug
   grove_servo.attach(pin_servo);
   grove_servo.write(close_degree);
+  FlexiTimer2::stop();
+  FlexiTimer2::set(detach_duration, delay_detach);
+  FlexiTimer2::start();
   
 // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);  //for debug
@@ -43,6 +55,7 @@ void loop(){
     serial_recv = Serial.read();
     if (serial_recv == 'o'){
       FlexiTimer2::stop();
+      grove_servo.attach(pin_servo);
       grove_servo.write(open_degree);
       
       counter++;  //for debug
